@@ -1,4 +1,4 @@
-# Probabilistic Methods for Data Quality in Healthcare
+# Comparison of AI Methods for Data Quality Assessment in Healthcare
 *A pragmatic assessment of integrating AI models for detecting data quality issues in healthcare.*
 
 ## Table of Contents
@@ -13,14 +13,38 @@
 - [Overview](#Overview)
 
 ## Summary
-Let's explore how **probabilistic methods and AI-driven anomaly detection** can enhance traditional data quality frameworks, making them more responsive, scalable, and effective in real-world healthcare environments. We'll briefly cover why organizations should care, what makes a robust data quality program, and examine a few AI-enabled probabilistic models suitable for data quality programs.
+Let's explore how **probabilistic methods and AI-driven anomaly detection** can enhance traditional data quality frameworks, making them more responsive, scalable, and effective in real-world healthcare environments. We'll briefly cover why organizations should care, what makes a robust data quality program, and examine a few AI-enabled probabilistic models suitable for data quality programs. Note that only probabilistic methods are evaluated here but clearly a combination of deterministic (rule based) and probabilistic checks would be required for a robust, scalable data quality program.
 
-[TODO: List assessment criteria]
+## Experiment
+The overall workflow for this comparison involves:
+1. Defining specific data quality issues to solve for.
+2. Identify leading AI/ML models for data quality detection.
+3. Train models using synthetic healthcare data.
+4. Deliberately introduce data quality issues.
+5. Predict a data quality score.
+6. Collect the results, assess efficacy, and compare.
 
-[TODO: List AI methods, findings, conclusion]
+> Synthetic data is not nearly as representative as real-world data but should be sufficient for proving the viability of these methods in our tests. Expect real-data to introduce more noise and require additional fine-tuning to produce effective results.
 
-## Use Cases
-In order to 
+### 1. Issues
+Let's nail down what data quality issues we want to include in our experiment. To keep things simple, we'll pick a single scenario for each Kahn dimension.
+| ID  | Name                                 | Dimension     | Scenario
+|-----|--------------------------------------|---------------|----------------------------------------------------------------------|
+| VC  | Observation Value/Code Mismatch      | Conformance   |A1c `6.4%` coded as `Glucose [Mass/volume] in Blood`                  |
+| PD  | Implausible Procedure for Diagnosis  | Plausibility  |`Alzheimer’s disease` diagnosis paired with `Tonsillectomy` procedure |
+| DD  | Missing Discharge for Disposition    | Completeness  |`Home` discharge disposition with missing discharge date              |
+
+### 2. AI/ML Models
+
+
+### 3. Training
+
+## Further Work
+[TODO: Describe where to go from here]
+- Cross resource evaluations
+- Cross organization evaluations
+- Aggregate level evaluations (no immunizations for a primary care provider)
+
 
 ## Background
 
@@ -60,7 +84,11 @@ It's important to note that the healthcare data ecosystem is a highly dynamic an
 
 Establishing robust data quality programs requires a [linqua franca](https://en.wikipedia.org/wiki/Lingua_franca) consumers and providers of quality data can use to assess, track, and improve quality over time. That begins with an accurate measurement for determining how well a bounded set of data meets the required data quality level for your program. A program might identify a set of key data quality measures, minimum targets for those measures, incentivize upstream data providers for meeting those targets, and feedback loops for when they don't.
 
+### Probabilistic versus Deterministic Methods
+Healthcare data is vast, heterogeneous, fluid, and often noisy. Traditional **deterministic rules** (like required fields or code set conformance) only catch **known, predefined issues** but on the plus side they are cost-effective, simple to understand, and predictable. In constrast, probabilistic rules are designed to catch novel, unpredictable, or highly contextualized issues which are difficult to define and maintain deterministically but at the cost of complexity and scalability constraints. Therefore, one method isn't better than the other but rather different tools for different jobs. The most comprehensive and effective approaches involve composing both deterministic and probabilistic rules to leverage the strengths, and minimize the weakness, of either.
+
 ## Additional Resources
 - [ISO SQuaRE](https://www.iso.org/standard/35736.html)
 - [Dimensions of Data Quality (DAMA)](https://dama-nl.org/dimensions-of-data-quality-en/)
 - The [PIQI Framework](https://piqiframework.org) by Clinical Architecture
+- [Synthea SyntheticMass](https://synthea.mitre.org/downloads)
