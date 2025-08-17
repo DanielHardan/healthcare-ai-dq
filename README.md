@@ -26,18 +26,22 @@ The overall workflow for this comparison involves:
 
 > Synthetic data is not nearly as representative as real-world data but should be sufficient for proving the viability of these methods in our tests. Expect real-data to introduce more noise and require additional fine-tuning to produce effective results.
 
-### 1. Issues
-Let's nail down what data quality issues we want to include in our experiment. To keep things simple, we'll pick a single scenario for each Kahn dimension.
+### Data Quality Issues
+Let's decide which data quality issues to include in the experiment. To keep things simple, we'll pick a single scenario for each Kahn dimension.
 | ID  | Name                                 | Dimension     | Scenario
 |-----|--------------------------------------|---------------|----------------------------------------------------------------------|
 | VC  | Observation Value/Code Mismatch      | Conformance   |A1c `6.4%` coded as `Glucose [Mass/volume] in Blood`                  |
 | PD  | Implausible Procedure for Diagnosis  | Plausibility  |`Alzheimer’s disease` diagnosis paired with `Tonsillectomy` procedure |
 | DD  | Missing Discharge for Disposition    | Completeness  |`Home` discharge disposition with missing discharge date              |
 
-### 2. AI/ML Models
+### AI/ML Models
 
 
-### 3. Training
+### Training
+
+### Results
+
+## Conclusion
 
 ## Further Work
 [TODO: Describe where to go from here]
