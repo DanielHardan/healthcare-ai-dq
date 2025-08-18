@@ -1,4 +1,11 @@
-torch
-torch-geometric
-pandas
-requests
+torch>=2.0.0
+torch-geometric>=2.3.0
+torch-scatter>=2.1.0
+torch-sparse>=0.6.16
+pandas>=2.0.0
+numpy>=1.23.0
+scikit-learn>=1.2.0
+matplotlib>=3.7.0
+requests>=2.28.0
+networkx>=3.0
+tqdm>=4.64.0

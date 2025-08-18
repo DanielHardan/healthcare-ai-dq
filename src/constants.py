@@ -1,2 +1,10 @@
 SYNTHEA_URL = "https://synthetichealth.github.io/synthea-sample-data/downloads/latest/synthea_sample_data_fhir_latest.zip"
 DATA_DIR = ".data"
+MODEL_DIR = ".models"
+RESULTS_DIR = ".results"
+BATCH_SIZE = 32
+HIDDEN_DIM = 64
+NUM_HEADS = 4
+LEARNING_RATE = 0.001
+NUM_EPOCHS = 100
+ANOMALY_THRESHOLD = 0.95  # Threshold for detecting anomalies (percentile)
