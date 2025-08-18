@@ -1,0 +1,4 @@
+torch
+torch-geometric
+pandas
+requests

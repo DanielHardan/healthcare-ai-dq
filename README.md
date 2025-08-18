@@ -48,33 +48,12 @@ The idea here is test new data against the bad data classifier to detect well-kn
 
 > Note that since the signal for the *good* and *bad* scenarios are different, they should be separate models.
 
-In addition, we'll leverage a **Large Language Model** approach using latest foundational LLMs to see how well an out-of-the-box model handles these scenarios (and at what cost). Since over half the planet thinks AI = ChatGPT, this will be a good baseline.
+In addition, let's throw the problem at a **Large Language Model** approach using latest foundational LLMs to see how well an out-of-the-box model handles these scenarios (and at what cost). Since over half the planet thinks AI = ChatGPT, this will be a good baseline.
 
-### AI/ML Models
-Let's introduce the models we'll use for detecting our mock data quality issues.
-
-Three classes of models we're looking at:
-- Distribution models
-- **Classification models** (really just distribution models with thresholds representing classes)
-- **Representational models**: Compresses features to their key representations / features in latent space, which can be expanded back into the original via decoders for generative purposes.
-
-
-| **Architecture**                  | **Type**                               | **Strengths**                                                                                                                             | **Limitations**                                                                               | **DQ Fit**                                                                                                                 |
-| --------------------------------- | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| **Graph Transformers**            | Representational (graph + attention)   | Models relationships across FHIR subgraphs; handles variable cardinality; captures dependencies across resources.                         | High complexity; requires large data + careful encoding; harder to train.                     | Best for **plausibility** (cross-resource consistency) and **conformance** (structural rules).                             |
-| **Gaussian Mixture (GMM)**        | Distribution (generative, parametric)  | Simple, interpretable; gives likelihood scores; works if data is low-dimensional, continuous.                                             | Requires fixed-length vectors; poor with categorical/graph data; brittle with high dimension. | Limited to simple **conformance** checks on tabularized FHIR (e.g., lab values).                                           |
-| **Variational Autoencoder (VAE)** | Hybrid (representation + distribution) | Learns latent features + distribution; good for mixed-type/high-dimensional data; flexible anomaly scoring (reconstruction + likelihood). | More complex training; may underfit if latent space too small.                                | Strong for **plausibility** (rare combinations), **completeness** (missing attributes), and **conformance** (code misuse). |
-
-
-- **Graph Transformers**: Uses self-attention mechanisms (just like LLMs) to reason over relationships across the clinical knowledge graph and variable cardinalities.
-- **Gaussian Mixture**: Uses Gaussion distributions to predict the likelikhood new data fits the learned distribution. However, input data must be fixed-dimensional feature vectors so loss is possible (e.g. ignore any diagnosis beyond 2nd position).
-Can't handle variable-length cardinality data.
-- **Varaible Autoencoders**: Extracts key features 
-
-These models are worth considering but were excluded for the reasons given:
-- **Binary Classification Models**: A simple class of "Is the data good, yes or no?" sounds promising but since classification systems require training on both good and bad data, and bad data has inifinite and unpredictable possibilities, it's the wrong tool.
-- **K-Means**: Assumes data points belong to one cluster which doesn't allow for compositional, relational models where points might belong to several clusters (unlike Gaussion Mixture Models).
-- **Autoencoders**: Provides good reconstruction of known scenarios but struggles with new, combinatorial data that it's not explicitly trained on. In other words, it interopolates poorly.
+The design of our AI model architecture includes:
+- **Graph Transformers**: Uses self-attention mechanisms (just like LLMs) to reason over relationships across the clinical knowledge graph with variable cardinalities (perfect for our FHIR JSON use case).
+- **Autoencoders**: Commonly used on anomaly detection to learn latent features and distribution of test data to score probability of new data fitting the learned distributions. This will only be used for anomaly detection (versus bad data classification).
+- **Open AI**: We'll use the latest version of ChatGPT (5).
 
 ### Training
 
