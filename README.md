@@ -17,12 +17,12 @@ Let's explore how **probabilistic methods and AI-driven anomaly detection** can 
 
 ## Experiment
 The overall workflow for this comparison involves:
-1. Defining specific data quality issues to solve for.
+1. Defining specific data quality issues to solve.
 2. Identify leading AI/ML models for data quality detection.
 3. Train models using synthetic healthcare data.
 4. Deliberately introduce data quality issues.
 5. Predict a data quality score.
-6. Collect the results, assess efficacy, and compare.
+6. Collect the results and compare efficacy.
 
 > Synthetic data is not nearly as representative as real-world data but should be sufficient for proving the viability of these methods in our tests. Expect real-data to introduce more noise and require additional fine-tuning to produce effective results.
 
@@ -32,10 +32,49 @@ Let's decide which data quality issues to include in the experiment. To keep thi
 |-----|--------------------------------------|---------------|----------------------------------------------------------------------|
 | VC  | Observation Value/Code Mismatch      | Conformance   |A1c `6.4%` coded as `Glucose [Mass/volume] in Blood`                  |
 | PD  | Implausible Procedure for Diagnosis  | Plausibility  |`Alzheimer’s disease` diagnosis paired with `Tonsillectomy` procedure |
-| DD  | Missing Discharge for Disposition    | Completeness  |`Home` discharge disposition with missing discharge date              |
+| DD  | Bodysite for Surgery                 | Completeness  |Bodysite omitted when procedure is a survery code                     |
+
+### AI Strategy
+Objectives:
+- Make models representative, low burden to train, and scalable by leveraging existing data, ideally unsupervised.
+- Prefer a human-in-the-middle feedback loop to ensure accuracy.
+- Error on the side of caution by prioritizing false positives over false negatives ([confusion matrix](https://en.wikipedia.org/wiki/Confusion_matrix)).
+
+There's two primary approaches we'll use...
+- **Anomaly Detection**: Train a model on what *good* data looks like to predict the probability that new data is good.
+- **Bad Data Classification**: Train a model on what *bad* data looks like to predict the probability that new data is bad.
+
+The idea here is test new data against the bad data classifier to detect well-known errors. If that passes, test against well-known correct data. If that passes, the data is assumed to be correct. If it fails, route the data to human adjudicators.
+
+> Note that since the signal for the *good* and *bad* scenarios are different, they should be separate models.
+
+In addition, we'll leverage a **Large Language Model** approach using latest foundational LLMs to see how well an out-of-the-box model handles these scenarios (and at what cost). Since over half the planet thinks AI = ChatGPT, this will be a good baseline.
 
 ### AI/ML Models
+Let's introduce the models we'll use for detecting our mock data quality issues.
 
+Three classes of models we're looking at:
+- Distribution models
+- **Classification models** (really just distribution models with thresholds representing classes)
+- **Representational models**: Compresses features to their key representations / features in latent space, which can be expanded back into the original via decoders for generative purposes.
+
+
+| **Architecture**                  | **Type**                               | **Strengths**                                                                                                                             | **Limitations**                                                                               | **DQ Fit**                                                                                                                 |
+| --------------------------------- | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| **Graph Transformers**            | Representational (graph + attention)   | Models relationships across FHIR subgraphs; handles variable cardinality; captures dependencies across resources.                         | High complexity; requires large data + careful encoding; harder to train.                     | Best for **plausibility** (cross-resource consistency) and **conformance** (structural rules).                             |
+| **Gaussian Mixture (GMM)**        | Distribution (generative, parametric)  | Simple, interpretable; gives likelihood scores; works if data is low-dimensional, continuous.                                             | Requires fixed-length vectors; poor with categorical/graph data; brittle with high dimension. | Limited to simple **conformance** checks on tabularized FHIR (e.g., lab values).                                           |
+| **Variational Autoencoder (VAE)** | Hybrid (representation + distribution) | Learns latent features + distribution; good for mixed-type/high-dimensional data; flexible anomaly scoring (reconstruction + likelihood). | More complex training; may underfit if latent space too small.                                | Strong for **plausibility** (rare combinations), **completeness** (missing attributes), and **conformance** (code misuse). |
+
+
+- **Graph Transformers**: Uses self-attention mechanisms (just like LLMs) to reason over relationships across the clinical knowledge graph and variable cardinalities.
+- **Gaussian Mixture**: Uses Gaussion distributions to predict the likelikhood new data fits the learned distribution. However, input data must be fixed-dimensional feature vectors so loss is possible (e.g. ignore any diagnosis beyond 2nd position).
+Can't handle variable-length cardinality data.
+- **Varaible Autoencoders**: Extracts key features 
+
+These models are worth considering but were excluded for the reasons given:
+- **Binary Classification Models**: A simple class of "Is the data good, yes or no?" sounds promising but since classification systems require training on both good and bad data, and bad data has inifinite and unpredictable possibilities, it's the wrong tool.
+- **K-Means**: Assumes data points belong to one cluster which doesn't allow for compositional, relational models where points might belong to several clusters (unlike Gaussion Mixture Models).
+- **Autoencoders**: Provides good reconstruction of known scenarios but struggles with new, combinatorial data that it's not explicitly trained on. In other words, it interopolates poorly.
 
 ### Training
 
@@ -47,8 +86,11 @@ Let's decide which data quality issues to include in the experiment. To keep thi
 [TODO: Describe where to go from here]
 - Cross resource evaluations
 - Cross organization evaluations
+- Using historical values to predict future likelihood
 - Aggregate level evaluations (no immunizations for a primary care provider)
 
+### Bonus: Mapping
+[TODO: Include semantic relationship checks using vectors/embeddings for mapping verification]
 
 ## Background
 
