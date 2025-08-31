@@ -1,26 +1,100 @@
-# Probabilistic Methods for Data Quality in Healthcare
-*A pragmatic assessment of integrating AI models for detecting data quality issues in healthcare.*
+# Graph Transformer Autoencoder for Healthcare Data Quality Assessment
+*Using graph neural networks to detect anomalies in healthcare data*
+
+## Overview
+This project implements a Graph Transformer Autoencoder/VAE model for detecting data quality issues in healthcare data. The focus is on anomaly detection for identifying potential data quality problems in synthetic healthcare data (FHIR format) from Synthea.
 
 ## Table of Contents
-- [Overview](#Overview)
-- [Use Cases](#Use-Cases)
+- [Data Quality Issues](#data-quality-issues)
+- [Technical Approach](#technical-approach)
+- [Project Structure](#project-structure)
+- [Running the Project](#running-the-project)
+- [Results](#results)
 - [Background](#Background)
     - [Why Data Quality Matters More Than Ever](#Why-Data-Quality-Matters-More-Than-Ever)
     - [Data Quality Defined](#Data-Quality-Defined)
     - [Knowledge Frameworks](#Knowledge-Frameworks)
     - [Data Quality Measurement](#Data-Quality-Measurement)
-- [Overview](#Overview)
-- [Overview](#Overview)
 
 ## Summary
-Let's explore how **probabilistic methods and AI-driven anomaly detection** can enhance traditional data quality frameworks, making them more responsive, scalable, and effective in real-world healthcare environments. We'll briefly cover why organizations should care, what makes a robust data quality program, and examine a few AI-enabled probabilistic models suitable for data quality programs.
+Let's explore how **probabilistic methods and AI-driven anomaly detection** can enhance traditional data quality frameworks, making them more responsive, scalable, and effective in real-world healthcare environments. We'll briefly cover why organizations should care, what makes a robust data quality program, and examine a few AI-enabled probabilistic models suitable for data quality programs. Note that only probabilistic methods are evaluated here but clearly a combination of deterministic (rule based) and probabilistic checks would be required for a robust, scalable data quality program.
 
-[TODO: List assessment criteria]
+## Experiment
+The overall workflow for this comparison involves:
+1. Defining specific data quality issues to solve.
+2. Identify leading AI/ML models for data quality detection.
+3. Train models using synthetic healthcare data.
+4. Deliberately introduce data quality issues.
+5. Predict a data quality score.
+6. Collect the results and compare efficacy.
 
-[TODO: List AI methods, findings, conclusion]
+> Synthetic data is not nearly as representative as real-world data but should be sufficient for proving the viability of these methods in our tests. Expect real-data to introduce more noise and require additional fine-tuning to produce effective results.
 
-## Use Cases
-In order to 
+### Data Quality Issues
+Let's decide which data quality issues to include in the experiment. To keep things simple, we'll pick a single scenario for each Kahn dimension.
+| ID  | Name                                 | Dimension     | Scenario
+|-----|--------------------------------------|---------------|----------------------------------------------------------------------|
+| VC  | Observation Value/Code Mismatch      | Conformance   |A1c `6.4%` coded as `Glucose [Mass/volume] in Blood`                  |
+| PD  | Implausible Procedure for Diagnosis  | Plausibility  |`Alzheimer’s disease` diagnosis paired with `Tonsillectomy` procedure |
+| DD  | Bodysite for Surgery                 | Completeness  |Bodysite omitted when procedure is a survery code                     |
+
+## Technical Approach
+
+### Graph Representation
+The implementation represents healthcare data as a graph where:
+- **Nodes**: Patients, Encounters, Observations, Conditions, and Procedures
+- **Edges**: Relationships between these entities (e.g., Patient-Encounter, Encounter-Observation)
+- **Node features**: Demographic information, clinical codes, values, etc.
+
+### Model Architecture
+The project implements two model variants:
+
+1. **Graph Transformer Autoencoder**
+   - Uses self-attention mechanisms via transformer layers
+   - Learns to encode and reconstruct graph node features
+   - Anomaly detection via reconstruction error
+
+2. **Graph Transformer Variational Autoencoder**
+   - Extends the autoencoder with a variational approach
+   - Learns a probabilistic encoding of the data
+   - Better handles uncertainty and provides more robust representations
+
+### Anomaly Detection Process
+1. **Data Loading**: Parse FHIR JSON files and build a healthcare knowledge graph
+2. **Training**: Train the model to learn normal patterns in the data
+3. **Evaluation**: Introduce synthetic anomalies and measure detection performance
+4. **Scoring**: Use reconstruction error to identify anomalous nodes
+
+## Project Structure
+- `src/main.py`: Main entry point
+- `src/constants.py`: Configuration constants
+- `src/download_data.py`: Downloads Synthea synthetic FHIR data
+- `src/preprocess.py`: Builds the healthcare graph and introduces test anomalies
+- `src/model.py`: Graph Transformer Autoencoder and VAE implementations
+- `src/detect_anomalies.py`: Training and evaluation pipeline
+
+## Running the Project
+1. Install dependencies: `pip install -r requirements.txt`
+2. Run: `python src/main.py`
+
+## Results
+The model produces:
+- Anomaly scores for each node in the graph
+- Evaluation metrics (AUC, Precision, Recall, F1)
+- Visualizations of training curves and anomaly distributions
+- Detailed analysis of detected anomalies
+
+## Future Work
+- Extend the model to work with larger, real-world healthcare datasets
+- Incorporate domain-specific constraints and knowledge
+- Implement active learning for continuous model improvement
+- Enable cross-resource and cross-organization evaluations
+- Using historical values to predict future likelihood
+- Aggregate level evaluations (no immunizations for a primary care provider)
+
+### References
+- Kahn Framework for Data Quality: [Link](https://pmc.ncbi.nlm.nih.gov/articles/PMC5051581/)
+- Synthea Synthetic Healthcare Data: [Link](https://synthea.mitre.org/)
 
 ## Background
 
@@ -60,7 +134,11 @@ It's important to note that the healthcare data ecosystem is a highly dynamic an
 
 Establishing robust data quality programs requires a [linqua franca](https://en.wikipedia.org/wiki/Lingua_franca) consumers and providers of quality data can use to assess, track, and improve quality over time. That begins with an accurate measurement for determining how well a bounded set of data meets the required data quality level for your program. A program might identify a set of key data quality measures, minimum targets for those measures, incentivize upstream data providers for meeting those targets, and feedback loops for when they don't.
 
+### Probabilistic versus Deterministic Methods
+Healthcare data is vast, heterogeneous, fluid, and often noisy. Traditional **deterministic rules** (like required fields or code set conformance) only catch **known, predefined issues** but on the plus side they are cost-effective, simple to understand, and predictable. In constrast, probabilistic rules are designed to catch novel, unpredictable, or highly contextualized issues which are difficult to define and maintain deterministically but at the cost of complexity and scalability constraints. Therefore, one method isn't better than the other but rather different tools for different jobs. The most comprehensive and effective approaches involve composing both deterministic and probabilistic rules to leverage the strengths, and minimize the weakness, of either.
+
 ## Additional Resources
 - [ISO SQuaRE](https://www.iso.org/standard/35736.html)
 - [Dimensions of Data Quality (DAMA)](https://dama-nl.org/dimensions-of-data-quality-en/)
 - The [PIQI Framework](https://piqiframework.org) by Clinical Architecture
+- [Synthea SyntheticMass](https://synthea.mitre.org/downloads)
